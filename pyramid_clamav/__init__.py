@@ -2,14 +2,11 @@ import sys
 import logging
 import clamd
 from pyramid.i18n import TranslationStringFactory, get_localizer
-_ = TranslationStringFactory('pyramid')
+_ = TranslationStringFactory('pyramid_clamav')
 
 
 clamlog = logging.getLogger(__name__)
 
-MESSAGE = _('found-virus-user-message',
-    default=u'Virus found in file upload: ${sig}. '
-            u'The file has been removed from the request.')
 
 if sys.platform == 'darwin':
     CLAMD_DEFAULT = '/tmp/clamd.socket'
@@ -21,8 +18,11 @@ def handle_virus(request, sig, key):
     localizer = get_localizer(request)
     log_message = u'Virus found: "{}"; Request key "{}"'.format(sig, key)
     clamlog.error(log_message)
-    request.session.flash(
-        localizer.translate(MESSAGE, mapping={'sig': sig}), 'error')
+    request.session.flash(_('found-virus-user-message',
+        default=u'Virus found in file upload: ${sig}. '
+            u'The file has been removed from the request.',
+        mapping={'sig': sig}), 'error')
+    del request.POST[key]
 
 
 class Tween(object):

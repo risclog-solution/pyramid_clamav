@@ -11,6 +11,7 @@ except IOError:
 
 install_requires = [
     'pyramid>=1.3',
+    'mock',
     'clamd'
     ]
 

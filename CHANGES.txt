@@ -2,7 +2,7 @@ pyramid_clamav
 ==============
 
 
-0.1 (unreleased)
+0.1 (2013-12-17)
 ----------------
 
 - Initial release.

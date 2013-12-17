@@ -1,0 +1,5 @@
+syntax:glob
+lib
+include
+bin
+*.egg-info

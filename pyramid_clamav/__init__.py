@@ -34,7 +34,7 @@ class Tween(object):
         self.handler = handler
         clamd_debug = config.get('pyramid_clamav.debug', False)
         clamd_socket_location = config.get(
-            'pyramid_clamav_socket', CLAMD_DEFAULT)
+            'pyramid_clamav.socket', CLAMD_DEFAULT)
         if not os.path.exists(clamd_socket_location) and clamd_debug:
             self.scanning = False
         self.clamd = clamd.ClamdUnixSocket(

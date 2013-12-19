@@ -22,3 +22,5 @@ msgstr ""
 msgid "found-virus-user-message"
 msgstr ""
 
+msgid "clamav-not-configured-message"
+msgstr ""

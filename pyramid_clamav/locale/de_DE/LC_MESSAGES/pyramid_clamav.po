@@ -21,3 +21,6 @@ msgstr ""
 msgid "found-virus-user-message"
 msgstr "In einem Dateiupload wurde ein Virus gefunden: ${sig} Die Betreffende Datei wurde aus der Anfrage entfernt."
 
+msgid "clamav-not-configured-message"
+msgstr "Dateiupload konnte nicht auf Viren überprüft werden, da ClamAV auf dem Server nicht konfiguriert ist."
+

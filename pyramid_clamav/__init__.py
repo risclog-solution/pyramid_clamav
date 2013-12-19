@@ -1,6 +1,7 @@
-import sys
-import logging
 import clamd
+import logging
+import os
+import sys
 from pyramid.i18n import TranslationStringFactory, get_localizer
 _ = TranslationStringFactory('pyramid_clamav')
 
@@ -27,11 +28,25 @@ def handle_virus(request, sig, key):
 
 class Tween(object):
 
+    scanning = True
+
     def __init__(self, handler, config):
         self.handler = handler
-        clamd_socket_location = config.get('clamd.socket', CLAMD_DEFAULT)
+        clamd_debug = config.get('pyramid_clamav.debug', False)
+        clamd_socket_location = config.get(
+            'pyramid_clamav_socket', CLAMD_DEFAULT)
+        if not os.path.exists(clamd_socket_location) and clamd_debug:
+            self.scanning = False
         self.clamd = clamd.ClamdUnixSocket(
             clamd_socket_location)
+        if clamd_debug:
+            try:
+                self.clamd.ping()
+            except clamd.ConnectionError:
+                self.scanning = False
+        if not self.scanning:
+            clamlog.warn('Virus scanning deactivated. (pyramid_clamav.debug '
+                         'is true and clamav not properly configured!')
 
     def __call__(self, request):
         if request.headers.get('Content-Type', '').startswith(
@@ -39,6 +54,14 @@ class Tween(object):
             for key in request.POST.keys():
                 if hasattr(request.POST[key], 'file') and \
                        type(request.POST[key].file) is file:
+                    if not self.scanning:
+                        request.session.flash(
+                            _('clamav-not-configured-message',
+                              default=u'File upload found but clamav is not '
+                              u'configured.'), 'error')
+                        clamlog.error('File upload found but '
+                                      'clamav is not configured.')
+                        continue
                     result = self.clamd.instream(request.POST[key].file)
                     if result.get('stream')[0] == u'FOUND':
                         sig = result.get('stream')[1]

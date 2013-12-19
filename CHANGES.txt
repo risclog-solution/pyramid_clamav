@@ -2,7 +2,7 @@ pyramid_clamav
 ==============
 
 
-0.4 (unreleased)
+0.4 (2013-12-19)
 ----------------
 
 - Fix small issue when the value for pyramid_clamav.debug is not configured.

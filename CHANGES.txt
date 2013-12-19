@@ -5,7 +5,7 @@ pyramid_clamav
 0.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fix small issue when the value for pyramid_clamav.debug is not configured.
 
 
 0.3 (2013-12-19)

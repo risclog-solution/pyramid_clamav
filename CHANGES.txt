@@ -5,7 +5,10 @@ pyramid_clamav
 0.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- pyramid_clamav.debug can now be set in config. If enabled AND clamav is not
+  configured, it will generate a flash message when a file upload was found,
+  but the file will not be touched. Additionally errors are logged at startup
+  and on file uploads.
 
 
 0.2 (2013-12-17)

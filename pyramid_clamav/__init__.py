@@ -33,6 +33,8 @@ class Tween(object):
     def __init__(self, handler, config):
         self.handler = handler
         clamd_debug = config.get('pyramid_clamav.debug', False)
+        if clamd_debug.lower().strip() in ('false', '0', 'no'):
+            clamd_debug = False
         clamd_socket_location = config.get(
             'pyramid_clamav.socket', CLAMD_DEFAULT)
         if not os.path.exists(clamd_socket_location) and clamd_debug:

@@ -2,7 +2,7 @@ pyramid_clamav
 ==============
 
 
-0.5 (unreleased)
+0.5 (2013-12-20)
 ----------------
 
 - When collecting file uploads from the request, check for file-like objects

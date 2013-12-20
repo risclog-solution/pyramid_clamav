@@ -16,7 +16,7 @@ install_requires = [
     ]
 
 setup(name='pyramid_clamav',
-      version='0.5.dev0',
+      version='0.5',
       description=('A tween checking file uploads for viruses using clamav.'),
       long_description=README + '\n\n' + CHANGES,
       classifiers=[

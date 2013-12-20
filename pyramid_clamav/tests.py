@@ -1,5 +1,6 @@
 #coding:utf8
 from pyramid_clamav import Tween
+import cStringIO as StringIO
 import clamd
 import mock
 import os
@@ -13,6 +14,12 @@ class FakeFileUpload(object):
         _, tmp = tempfile.mkstemp()
         os.write(_, content)
         self.file = open(tmp, 'rw')
+
+
+class StringIOFileUpload(object):
+
+    def __init__(self, content):
+        self.file = StringIO.StringIO(content)
 
 
 class FakeRequest(object):
@@ -29,9 +36,6 @@ def fake_handler(arg):
 clean_post = dict(uploadedfile=FakeFileUpload('clean file'))
 clean_request = FakeRequest('multipart/form-data', clean_post)
 
-vir_post = dict(uploadedfile=FakeFileUpload(clamd.EICAR))
-vir_request = FakeRequest('multipart/form-data', vir_post)
-
 
 class TestClam(unittest.TestCase):
 
@@ -44,14 +48,21 @@ class TestClam(unittest.TestCase):
             fake_handler.assert_called_with(clean_request)
 
     def test_vir_is_found_in_req(self):
-        with mock.patch('pyramid_clamav.tests.fake_handler') as handler,\
+        self.assert_virus_in_file_like_upload(FakeFileUpload(clamd.EICAR))
+
+    def test_vir_is_found_in_req_with_stringio(self):
+        self.assert_virus_in_file_like_upload(StringIOFileUpload(clamd.EICAR))
+
+    def assert_virus_in_file_like_upload(self, file_like):
+        post = dict(uploadedfile=file_like)
+        request = FakeRequest('multipart/form-data', post)
+
+        with mock.patch('pyramid_clamav.tests.fake_handler'), \
                 mock.patch('pyramid_clamav.handle_virus') as virus:
             tween = Tween(fake_handler, {})
-            tween(vir_request)
-            virus.assert_called_with(vir_request, 
+            tween(request)
+            virus.assert_called_with(request,
                                      u'Eicar-Test-Signature',
                                      'uploadedfile')
-            fake_handler.assert_called_with(vir_request)
-            assert vir_request.POST['uploadedfile'].file.read() == ''
-
-
+            fake_handler.assert_called_with(request)
+            assert request.POST['uploadedfile'].file.read() == ''

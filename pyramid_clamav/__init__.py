@@ -55,7 +55,7 @@ class Tween(object):
                 'multipart/form-data'):
             for key in request.POST.keys():
                 if hasattr(request.POST[key], 'file') and \
-                       type(request.POST[key].file) is file:
+                       self.is_file_like(request.POST[key].file):
                     if not self.scanning:
                         request.session.flash(
                             _('clamav-not-configured-message',
@@ -71,6 +71,9 @@ class Tween(object):
                     else:
                         request.POST[key].file.seek(0)
         return self.handler(request)
+
+    def is_file_like(self, obj):
+        return hasattr(obj, 'read') and hasattr(obj, 'seek')
 
 
 def factory(handler, registry):

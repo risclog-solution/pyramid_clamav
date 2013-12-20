@@ -5,7 +5,8 @@ pyramid_clamav
 0.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- When collecting file uploads from the request, check for file-like objects
+  instead of instances of exact type ``file``.
 
 
 0.4 (2013-12-19)

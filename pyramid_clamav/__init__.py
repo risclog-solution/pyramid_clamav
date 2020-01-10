@@ -87,7 +87,7 @@ class Tween(object):
                         OSError, BrokenPipeError, clamd.ConnectionError
                     ) as e:
                         clamlog.error(
-                            'Connection to ClamD was los: {}'.format(str(e))
+                            'Connection to ClamD was lost: {}'.format(str(e))
                         )
                         request.POST[key].file.seek(0)
                     else:

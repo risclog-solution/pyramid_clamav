@@ -7,6 +7,8 @@ pyramid_clamav
 
 - Add compatability to Python 3.
 
+- Retry connection to clamd if it is busy.
+
 
 0.5 (2013-12-20)
 ----------------

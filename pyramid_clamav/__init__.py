@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import clamd
 import logging
 import sys
+import time
 from pyramid.i18n import TranslationStringFactory, get_localizer
 _ = TranslationStringFactory('pyramid_clamav')
 
@@ -49,6 +50,17 @@ class Tween(object):
             clamlog.info('Found clamd and its responding. Virus scanning '
                          'activated.')
 
+    def _check_file(self, request, key, checks=0):
+        try:
+            return self.clamd.instream(request.POST[key].file)
+        except (OSError, BrokenPipeError, clamd.ConnectionError):
+            checks += 1
+            if checks == 3:
+                raise
+            time.sleep(0.5)
+            request.POST[key].file.seek(0)
+            return self._check_file(request, key, checks)
+
     def __call__(self, request):
         if request.headers.get('Content-Type', '').startswith(
                 'multipart/form-data'):
@@ -60,15 +72,18 @@ class Tween(object):
                         request.session.flash(
                             localizer.translate(
                                 _('clamav-not-configured-message',
-                                  default=('File upload found but clamav is not '
-                                           'configured.'))),
-                            'error')
+                                  default=(
+                                      'File upload found but clamav is not '
+                                      'configured.'
+                                    )
+                                  )
+                                ), 'error')
                         clamlog.error('File upload found but '
                                       'clamav is not configured.')
                         continue
                     try:
-                        result = self.clamd.instream(request.POST[key].file)
-                    except (OSError, BrokenPipeError):
+                        result = self._check_file(request, key)
+                    except (OSError, BrokenPipeError, clamd.ConnectionError):
                         request.POST[key].file.seek(0)
                     else:
                         if result.get('stream')[0] == 'FOUND':

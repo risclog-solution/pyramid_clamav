@@ -91,7 +91,7 @@ class Tween(object):
                         )
                         request.POST[key].file.seek(0)
                     else:
-                        if result.get('stream')[0] == 'FOUND':
+                        if result and result.get('stream')[0] == 'FOUND':
                             sig = result.get('stream')[1]
                             handle_virus(request, sig, key)
                         else:

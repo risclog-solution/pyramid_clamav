@@ -5,7 +5,7 @@ pyramid_clamav
 0.7 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Bugfix: `Nonetype object has no attribute get`
 
 
 0.6 (2020-01-10)

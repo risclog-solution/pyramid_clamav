@@ -83,7 +83,12 @@ class Tween(object):
                         continue
                     try:
                         result = self._check_file(request, key)
-                    except (OSError, BrokenPipeError, clamd.ConnectionError):
+                    except (
+                        OSError, BrokenPipeError, clamd.ConnectionError
+                    ) as e:
+                        clamlog.error(
+                            'Connection to ClamD was los: {}'.format(str(e))
+                        )
                         request.POST[key].file.seek(0)
                     else:
                         if result.get('stream')[0] == 'FOUND':

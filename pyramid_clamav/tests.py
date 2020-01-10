@@ -69,6 +69,6 @@ class TestClam(unittest.TestCase):
 
     def test_no_failure_if_clamav_is_busy(self):
         with mock.patch('clamd.ClamdUnixSocket.instream') as instream:
-            instream.side_effect = OSError
+            instream.side_effect = OSError('I am busy')
             tween = Tween(fake_handler, {})
             tween(clean_request)

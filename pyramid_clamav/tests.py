@@ -1,6 +1,6 @@
-#coding:utf8
+# coding=utf8
 from pyramid_clamav import Tween
-import cStringIO as StringIO
+from io import BytesIO
 import clamd
 import mock
 import os
@@ -13,13 +13,13 @@ class FakeFileUpload(object):
     def __init__(self, content):
         _, tmp = tempfile.mkstemp()
         os.write(_, content)
-        self.file = open(tmp, 'rw')
+        self.file = open(tmp, 'rb')
 
 
 class StringIOFileUpload(object):
 
     def __init__(self, content):
-        self.file = StringIO.StringIO(content)
+        self.file = BytesIO(content)
 
 
 class FakeRequest(object):
@@ -33,14 +33,14 @@ def fake_handler(arg):
     pass
 
 
-clean_post = dict(uploadedfile=FakeFileUpload('clean file'))
+clean_post = dict(uploadedfile=FakeFileUpload(b'clean file'))
 clean_request = FakeRequest('multipart/form-data', clean_post)
 
 
 class TestClam(unittest.TestCase):
 
-    def test_request_with_no_vir_goes_trough(self):
-        with mock.patch('pyramid_clamav.tests.fake_handler') as handler,\
+    def test_request_with_no_vir_goes_through(self):
+        with mock.patch('pyramid_clamav.tests.fake_handler') as fake_handler,\
                 mock.patch('pyramid_clamav.handle_virus') as virus:
             tween = Tween(fake_handler, {})
             tween(clean_request)
@@ -62,7 +62,13 @@ class TestClam(unittest.TestCase):
             tween = Tween(fake_handler, {})
             tween(request)
             virus.assert_called_with(request,
-                                     u'Eicar-Test-Signature',
+                                     'Eicar-Test-Signature',
                                      'uploadedfile')
             fake_handler.assert_called_with(request)
-            assert request.POST['uploadedfile'].file.read() == ''
+            assert request.POST['uploadedfile'].file.read() == b''
+
+    def test_no_failure_if_clamav_is_busy(self):
+        with mock.patch('clamd.ClamdUnixSocket.instream') as instream:
+            instream.side_effect = OSError
+            tween = Tween(fake_handler, {})
+            tween(clean_request)

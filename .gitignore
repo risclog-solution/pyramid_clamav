@@ -3,3 +3,4 @@ lib
 include
 bin
 *.egg-info
+.eggs

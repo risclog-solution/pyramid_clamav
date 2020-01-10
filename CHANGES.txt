@@ -2,7 +2,7 @@ pyramid_clamav
 ==============
 
 
-0.7 (unreleased)
+0.7 (2020-01-10)
 ----------------
 
 - Bugfix: `Nonetype object has no attribute get`

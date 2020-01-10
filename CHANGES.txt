@@ -5,7 +5,7 @@ pyramid_clamav
 0.6 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Add compatability to Python 3.
 
 
 0.5 (2013-12-20)

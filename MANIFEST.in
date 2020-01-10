@@ -1,0 +1,3 @@
+  include *.txt
+  recursive-include pyramid_clamav *.po
+  recursive-include pyramid_clamav *.pot

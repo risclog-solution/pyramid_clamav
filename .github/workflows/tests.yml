@@ -1,0 +1,33 @@
+name: pyramid_clamav tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 3 * * *'
+
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [2.7, 3.7]
+
+    steps:
+    - name: Checkout pyramid_clamav
+      uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install and configure clamd
+      run: |
+        sudo apt-get update
+        sudo apt-get -yqq install clamav-daemon
+    - name: Test
+      run: python setup.py test
+      env:
+        PYTHONUNBUFFERED: 1

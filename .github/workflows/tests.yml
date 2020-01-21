@@ -27,7 +27,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -yqq install clamav-daemon
-        sleep 15
+        sudo curl http://database.clamav.net/main.cvd -o /var/lib/clamav
+        sudo curl http://database.clamav.net/daily.cvd -o /var/lib/clamav
         sudo clamd &
     - name: Test
       run: python setup.py test

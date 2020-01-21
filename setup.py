@@ -44,6 +44,7 @@ setup(name='pyramid_clamav',
       extras_require={
         'test': [
           'pytest',
+          'pytest-platform-markers',
         ]
       },
       entry_points='',

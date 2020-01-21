@@ -31,3 +31,4 @@ jobs:
       run: pytest
       env:
         PYTHONUNBUFFERED: 1
+        CI: 1

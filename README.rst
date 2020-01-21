@@ -20,3 +20,6 @@ A flashmessage is presented to the user stating that a file contained a virus
 and it has been removed.
 
 It should also work for multiple files.
+
+
+This project was conceived by Daniel Havlik (dh@gocept.com).

@@ -48,10 +48,10 @@ class TestClam(unittest.TestCase):
     def test_vir_is_found_in_req(self):
         self.assert_virus_in_file_like_upload(FakeFileUpload(clamd.EICAR))
 
+    @pytest.mark.not_ci
     def test_vir_is_found_in_req_with_stringio(self):
         self.assert_virus_in_file_like_upload(StringIOFileUpload(clamd.EICAR))
 
-    @pytest.mark.not_ci
     def assert_virus_in_file_like_upload(self, file_like):
         post = dict(uploadedfile=file_like)
         request = FakeRequest('multipart/form-data', post)

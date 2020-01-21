@@ -29,10 +29,6 @@ class FakeRequest(object):
         self.POST = post
 
 
-def fake_handler(arg):
-    pass
-
-
 clean_post = dict(uploadedfile=FakeFileUpload(b'clean file'))
 clean_request = FakeRequest('multipart/form-data', clean_post)
 
@@ -57,7 +53,7 @@ class TestClam(unittest.TestCase):
         post = dict(uploadedfile=file_like)
         request = FakeRequest('multipart/form-data', post)
 
-        with mock.patch('pyramid_clamav.tests.fake_handler'), \
+        with mock.patch('pyramid_clamav.tests.fake_handler') as fake_handler, \
                 mock.patch('pyramid_clamav.handle_virus') as virus:
             tween = Tween(fake_handler, {})
             tween(request)
@@ -68,6 +64,7 @@ class TestClam(unittest.TestCase):
             assert request.POST['uploadedfile'].file.read() == b''
 
     def test_no_failure_if_clamav_is_busy(self):
+        from pyramid_clamav.tests import fake_handler
         with mock.patch('clamd.ClamdUnixSocket.instream') as instream:
             instream.side_effect = OSError('I am busy')
             tween = Tween(fake_handler, {})

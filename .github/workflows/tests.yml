@@ -23,16 +23,11 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install and configure clamd
+    - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get -yqq install clamav-daemon
-        sudo mkdir -p /var/lib/clamav
-        sudo curl http://database.clamav.net/main.cvd -o /var/lib/clamav/main.cvd
-        sudo curl http://database.clamav.net/daily.cvd -o /var/lib/clamav/daily.cvd
-        sudo clamd &
-        ps aux | grep clam
-    - name: Test
-      run: python setup.py test
+          pip install -e .
+          pip install -e .[test]
+    - name: Test with pytest
+      run: pytest
       env:
         PYTHONUNBUFFERED: 1

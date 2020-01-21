@@ -41,5 +41,10 @@ setup(name='pyramid_clamav',
       include_package_data=True,
       zip_safe=False,
       install_requires=install_requires,
+      extras_require={
+        'test': [
+          'pytest',
+        ]
+      },
       entry_points='',
       )

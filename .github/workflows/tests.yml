@@ -31,6 +31,7 @@ jobs:
         sudo curl http://database.clamav.net/main.cvd -o /var/lib/clamav/main.cvd
         sudo curl http://database.clamav.net/daily.cvd -o /var/lib/clamav/daily.cvd
         sudo clamd &
+        ps aux | grep clam
     - name: Test
       run: python setup.py test
       env:

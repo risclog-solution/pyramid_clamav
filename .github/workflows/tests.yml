@@ -27,7 +27,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -yqq install clamav-daemon
-        /etc/init.d/clamav-daemon start
+        ps aux | grep clamd
     - name: Test
       run: python setup.py test
       env:

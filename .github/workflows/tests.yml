@@ -27,8 +27,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -yqq install clamav-daemon
-        sudo freshclam
-        sudo clamd &
+        sleep 60
+        ps aux | grep clam
     - name: Test
       run: python setup.py test
       env:

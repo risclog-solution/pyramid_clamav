@@ -12,17 +12,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [2.7, 3.7]
 
     steps:
     - name: Checkout pyramid_clamav
       uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.7
     - name: Install dependencies
       run: |
           pip install -e .

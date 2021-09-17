@@ -1,8 +1,12 @@
-from __future__ import unicode_literals
+import json.decoder
+import re
+import urllib.error
+import base64
 import clamd
 import logging
 import sys
 import time
+from io import BytesIO
 from pyramid.i18n import TranslationStringFactory, get_localizer
 _ = TranslationStringFactory('pyramid_clamav')
 
@@ -21,7 +25,33 @@ def handle_virus(request, sig, key):
                        'The file has been removed from the request.'),
               mapping={'sig': sig})),
         'error')
-    del request.POST[key]
+    if key in request.POST:
+        del request.POST[key]
+    return log_message
+
+
+def is_base64(element):
+    expression = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
+
+    try:
+        return bool(re.match(expression, element))
+    except TypeError:
+        return False
+
+
+def check_json_data_for_virus(data, tween, request, key=None):
+    if (isinstance(data, list)):
+        for item in data:
+            check_json_data_for_virus(item, tween, request)
+    elif (isinstance(data, dict)):
+        for key, value in data.items():
+            check_json_data_for_virus(value, tween, request, key=key)
+    else:
+        if is_base64(data):
+            file = BytesIO(base64.b64decode(data))
+            message = tween._handle(request, key, file)
+            if message:
+                raise urllib.error.HTTPError(400, message, None, None, None)
 
 
 class Tween(object):
@@ -50,16 +80,51 @@ class Tween(object):
             clamlog.info('Found clamd and its responding. Virus scanning '
                          'activated.')
 
-    def _check_file(self, request, key, checks=0):
+    def _check_file(self, request, key, file, checks=0):
         try:
-            return self.clamd.instream(request.POST[key].file)
+            return self.clamd.instream(file)
         except (OSError, BrokenPipeError, clamd.ConnectionError):
             checks += 1
             if checks == 3:
                 raise
             time.sleep(0.5)
-            request.POST[key].file.seek(0)
-            return self._check_file(request, key, checks)
+            file.seek(0)
+            return self._check_file(request, key, file, checks)
+
+    def _handle(self, request, key, file):
+        if not self.scanning:
+            localizer = get_localizer(request)
+            request.session.flash(
+                localizer.translate(
+                    _(
+                        'clamav-not-configured-message',
+                        default=(
+                            'File upload found but clamav is not '
+                            'configured.'
+                        )
+                    )
+                ),
+                'error'
+            )
+            clamlog.error(
+                'File upload found but clamav is not configured.'
+            )
+            return
+        try:
+            result = self._check_file(request, key, file)
+        except (
+            OSError, BrokenPipeError, clamd.ConnectionError
+        ) as e:
+            clamlog.error(
+                'Connection to ClamD was lost: {}'.format(str(e))
+            )
+            file.seek(0)
+        else:
+            if result and result.get('stream')[0] == 'FOUND':
+                sig = result.get('stream')[1]
+                return handle_virus(request, sig, key)
+            else:
+                file.seek(0)
 
     def __call__(self, request):
         if request.headers.get('Content-Type', '').startswith(
@@ -67,35 +132,14 @@ class Tween(object):
             for key in request.POST.keys():
                 if hasattr(request.POST[key], 'file') and \
                        self.is_file_like(request.POST[key].file):
-                    if not self.scanning:
-                        localizer = get_localizer(request)
-                        request.session.flash(
-                            localizer.translate(
-                                _('clamav-not-configured-message',
-                                  default=(
-                                      'File upload found but clamav is not '
-                                      'configured.'
-                                    )
-                                  )
-                                ), 'error')
-                        clamlog.error('File upload found but '
-                                      'clamav is not configured.')
-                        continue
-                    try:
-                        result = self._check_file(request, key)
-                    except (
-                        OSError, BrokenPipeError, clamd.ConnectionError
-                    ) as e:
-                        clamlog.error(
-                            'Connection to ClamD was lost: {}'.format(str(e))
-                        )
-                        request.POST[key].file.seek(0)
-                    else:
-                        if result and result.get('stream')[0] == 'FOUND':
-                            sig = result.get('stream')[1]
-                            handle_virus(request, sig, key)
-                        else:
-                            request.POST[key].file.seek(0)
+                    self._handle(request, key, request.POST[key].file)
+        if request.headers.get('Content-Type', '') == 'application/json':
+            try:
+                request.json
+            except json.decoder.JSONDecodeError:
+                pass  # Broken json request, handle in application
+            else:
+                check_json_data_for_virus(request.json, self, request)
         return self.handler(request)
 
     def is_file_like(self, obj):

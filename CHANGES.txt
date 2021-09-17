@@ -7,6 +7,8 @@ pyramid_clamav
 
 - Remove Python 2 support.
 
+- Check application/json requests for viruses.
+
 
 0.7 (2020-01-10)
 ----------------

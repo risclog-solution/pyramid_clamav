@@ -2,7 +2,7 @@ pyramid_clamav
 ==============
 
 
-0.8 (unreleased)
+0.8 (2021-09-17)
 ----------------
 
 - Remove Python 2 support.

@@ -2,7 +2,7 @@ pyramid_clamav
 ==============
 
 
-0.9 (unreleased)
+0.9 (2022-03-04)
 ----------------
 
 - Ignore csrf tokens which look like base64 encoded files.

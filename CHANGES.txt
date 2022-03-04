@@ -5,7 +5,7 @@ pyramid_clamav
 0.9 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Ignore csrf tokens which look like base64 encoded files.
 
 
 0.8 (2021-09-17)

@@ -47,7 +47,7 @@ def check_json_data_for_virus(data, tween, request, key=None):
         for key, value in data.items():
             check_json_data_for_virus(value, tween, request, key=key)
     else:
-        if is_base64(data):
+        if is_base64(data) and key != 'csrf_token':
             file = BytesIO(base64.b64decode(data))
             message = tween._handle(request, key, file)
             if message:
